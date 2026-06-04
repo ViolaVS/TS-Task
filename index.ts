@@ -10,24 +10,22 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function checkUserData(data: unknown): UserData | null {
-  if (!isObject(data)) return null;
-  if (!isObject(data.user)) return null;
+function checkUserData(data: unknown): data is UserData {
+  if (!isObject(data)) return false;
+  if (!isObject(data.user)) return false;
+  if (typeof data.user.name !== 'string') return false;
 
-  if (typeof data.user.name !== 'string') return null;
-
-  return {
-    user: {
-      name: data.user.name,
-    },
-  };
+  return true;
 }
 
 function getUserNameFromJSON(jsonString: string): string | null {
   try {
     const parsed: unknown = JSON.parse(jsonString);
-    const data = checkUserData(parsed);
-    return data?.user.name ?? null;
+
+    if (checkUserData(parsed)) {
+      return parsed.user.name;
+    }
+    return null;
   } catch {
     return null;
   }
